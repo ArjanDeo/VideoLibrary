@@ -1,0 +1,67 @@
+﻿@using VideoLibrary.Models.WebApp
+<div class="column width-12">
+    <div class="column width-12 flex boxes">
+        <div class="box rounded large shadow">
+            <div class="column width-12">
+                @(Html.DevExtreme().DataGrid<sp_GetVideoDataModel>()
+                    .ID("VideoGrid")
+                    .AllowColumnResizing(true)
+                    .ColumnMinWidth(50)
+                    .ColumnAutoWidth(true)
+                    .ShowBorders(true)
+                    .Editing(editing =>
+                    {
+                        editing.Mode(GridEditMode.Row);
+                        editing.AllowAdding(true);
+                        editing.AllowDeleting(true);
+                        editing.AllowUpdating(true);
+                    })
+                    .DataSource(d => d.Mvc().Controller("Video").LoadAction("GetVideoData").Key("VideoId").InsertAction("InsertVideoData").UpdateAction("UpdateVideoData").DeleteAction("DeleteVideoData"))
+                    .Columns(columns =>
+                    {
+                        columns.AddFor(m => m.Title).Caption("Video Title");
+                        columns.AddFor(m => m.Url).Caption("Video URL").CellTemplate(new TemplateName("vendorRef"));
+                        columns.AddFor(m => m.Source).Caption("Video Source");
+                        columns.AddFor(m => m.Actors).Caption("Video Actors");
+                    })
+                    .Paging(p => p.PageSize(10))
+                    .FilterRow(f => f.Visible(true))
+                    .FilterRow(f => f.ApplyFilter(GridApplyFilterMode.Auto))
+                    .FilterRow(f => f.ShowOperationChooser(false))
+                    .HeaderFilter(f => f
+                    .Visible(true)
+                    .AllowSearch(true))
+                    .GroupPanel(p => p.Visible(false))
+                    .Grouping(g => g.AutoExpandAll(false))
+                    .RemoteOperations(true)
+                    .NoDataText("No Videos :(")
+                    .Export(e => e.Enabled(true))
+                    .Selection(s => s.Mode(SelectionMode.Single))
+                    .OnCellClick("gridCellClick")
+                    )
+            </div>
+        </div>
+    </div>
+</div>
+<div id="templates">
+    @using (Html.DevExtreme().NamedTemplate("vendorRef"))
+    {
+        <div class="cellPointerRef">
+            <%- data.Url %>
+        </div>
+    }
+</div>
+<script>
+    function gridCellClick(e) {
+        var cI = e.columnIndex;
+        if (cI == 1) {
+            var vendorTrackingURL = e.data.Url;
+            console.log(vendorTrackingURL)
+            if (vendorTrackingURL == '' || vendorTrackingURL == null) {
+                DevExpress.ui.notify('No Url Found', 'error', 1200);
+            } else {
+                window.open(vendorTrackingURL, '_blank');
+            }
+        }
+    }
+</script>
